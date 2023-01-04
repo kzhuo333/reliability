@@ -200,7 +200,15 @@ class oc_plotter:
         self.fig.canvas.draw() # This is needed to force the plot to refresh or there will be some delay
 
     #%% ylim slider
-    def make_ylim_slider(self):
+    def make_ylim_slider(self)->None:
+        """
+        Make slider widget to adjust y range
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+        """
         # Make a vertically oriented slider to control the probability of acceptance
         ylim_slider_ax = self.fig.add_axes([X_CORNER-SLIDER_OFFSET, Y_CORNER, SLIDER_WIDTH, SLIDER_LENGTH]) #https://matplotlib.org/stable/api/figure_api.html
         self.ylim_slider = Slider(
@@ -240,23 +248,63 @@ class oc_plotter:
         self.xlim_slider.on_changed(self.xlim_update)
         
     def xlim_update(self, val)->None:
+        """
+        Method to set x range limit. To connect to x range slider widget.
+
+        Parameters
+        ----------
+        val : TYPE
+            Limit for x range.
+
+        Returns
+        -------
+        None
+
+        """
         self.ax.set_xlim(0.0, self.xlim_slider.val)
         self.fig.canvas.draw_idle()
     
     #%% Sample size text box
-    def make_sample_size_tbox(self):
+    def make_sample_size_tbox(self)->None:
+        """
+        Makes text box widget for sample size entry.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        """
         sample_size_tbox_ax = self.fig.add_axes([0.1, 0.05, 0.075, 0.05])
         self.sample_size_tbox = TextBox(sample_size_tbox_ax, "n", textalignment="left")
         self.sample_size_tbox.set_val(f"{SAMPLE_SIZE}")
     
     #%% Acceptance number text box
-    def make_acceptance_number_tbox(self):
+    def make_acceptance_number_tbox(self)->None:
+        """
+        Make text box widget for acceptance number entry.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        """
         acceptance_number_tbox_ax = self.fig.add_axes([0.2, 0.05, 0.075, 0.05])
         self.acceptance_number_tbox = TextBox(acceptance_number_tbox_ax, "k", textalignment="left")
         self.acceptance_number_tbox.set_val(f"{ACCEPTANCE_NUMBER}")
         
     #%% Alpha
-    def make_alpha_tbox(self):
+    def make_alpha_tbox(self)->None:
+        """
+        Make text box widget for alpha risk entry.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        """
         alpha_tbox_ax = self.fig.add_axes([0.4, 0.05, 0.075, 0.05])
         self.alpha_tbox = TextBox(alpha_tbox_ax, "Alpha", textalignment="left")
         self.alpha_tbox.set_val(f"{ALPHA}")
@@ -294,13 +342,35 @@ class oc_plotter:
         
     
     #%% AQL
-    def make_aql_tbox(self):
+    def make_aql_tbox(self)->None:
+        """
+        Make text box widget for AQL entry.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        """
         aql_tbox_ax = self.fig.add_axes([0.53, 0.05, 0.075, 0.05])
         self.aql_tbox = TextBox(aql_tbox_ax, "AQL", textalignment="left")
         self.aql_tbox_cid = self.aql_tbox.on_submit(self.aql_update) # Note cid to connect/disconnect events
         
     def aql_update(self, val:str)->None:
-        
+        """
+        Method to update AQL.
+
+        Parameters
+        ----------
+        val : str
+            Value to update AQL.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        """
         # Use linear interpolation to find Alpha target corresponding to given AQL target
         x_target = float(val)
         print(f"New AQL {x_target}")
@@ -317,7 +387,16 @@ class oc_plotter:
         self.update_aql_pt(x_target, y_target)
 
     #%% Beta
-    def make_beta_tbox(self):
+    def make_beta_tbox(self)->None:
+        """
+        Make text box widget for Beta risk entry.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        """
         beta_tbox_ax = self.fig.add_axes([0.7, 0.05, 0.075, 0.05])
         self.beta_tbox = TextBox(beta_tbox_ax, "Beta", textalignment="left")
         self.beta_tbox.set_val(f"{BETA}")
@@ -354,12 +433,33 @@ class oc_plotter:
         
     #%% RQL
     def make_rql_tbox(self):
+        """
+        Make text box widget for RQL entry.
+
+        Returns
+        -------
+        None.
+
+        """
         rql_tbox_ax = self.fig.add_axes([0.83, 0.05, 0.075, 0.05])
         self.rql_tbox = TextBox(rql_tbox_ax, "RQL", textalignment="left")
         self.rql_tbox_cid = self.rql_tbox.on_submit(self.rql_update)
         
     def rql_update(self, val:str)->None:
-        
+        """
+        Method to update RQL.
+
+        Parameters
+        ----------
+        val : str
+            Value to update RQL.
+
+        Returns
+        -------
+        None
+            DESCRIPTION.
+
+        """
         x_target = float(val)
         print(f"New rql {x_target}")
         idx_l, idx_r = get_envelope(self.x_data, x_target)
@@ -405,3 +505,5 @@ if __name__ == "__main__":
     # Hook up sample plan parameter text box events
     plotter.acceptance_number_tbox.on_submit(acceptance_number_update)
     plotter.sample_size_tbox.on_submit(sample_size_update)
+    
+    plt.show()
