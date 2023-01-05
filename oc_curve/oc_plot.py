@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Plotter for operating characteristic curve.
+
 Created on Tue Dec 13 02:38:54 2022
 
 @author: kzhuo
@@ -8,9 +10,9 @@ Created on Tue Dec 13 02:38:54 2022
 
 
 import sys
-sys.path.insert(0, '/Users/kzhuo/kz')
+sys.path.insert(0, '/Users/kzhuo/kz/oc_curve')
 
-from main import get_oc, sample_plan, get_nearest_index, get_envelope, oc_curve
+from oc_curve import get_envelope, oc_curve
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, TextBox
 from typing import Final, List, Tuple
@@ -32,6 +34,10 @@ ALPHA:Final[float] = 0.05
 BETA:Final[float] = 0.10
 
 class oc_plotter:
+    """
+    Plotter class for operating characteristic curve. 
+    """
+    
     def __init__(self, x_data:List[float], y_data:List[float])->None:
         """
         Operating characteristic curve plotter constructor.
