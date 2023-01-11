@@ -346,7 +346,11 @@ class oc_plotter:
         """
         
         # Use linear interpolation to find AQL target corresponding to given Alpha target
-        y_target = 1.0 - float(val)
+        try:
+            y_target = 1.0 - float(val)
+        except ValueError:
+            print("Invalid Alpha.")
+            return
         y_target = self.set_limit(y_target)
 
         print(f"New Alpha {y_target}")
@@ -400,7 +404,13 @@ class oc_plotter:
 
         """
         # Use linear interpolation to find Alpha target corresponding to given AQL target
-        x_target = float(val)
+        try:
+            x_target = float(val)
+        except ValueError:
+            print("Invalid AQL.")
+            return
+
+        x_target = self.set_limit(x_target)
         print(f"New AQL {x_target}")
         idx_l, idx_r = get_envelope(self.x_data, x_target)
         m, c = self.get_line(idx_l, idx_r)
@@ -452,20 +462,32 @@ class oc_plotter:
         """
         
         # Use linear interpolation to find rql target corresponding to given beta target
-        y_target = float(val)
+        try:
+            y_target = float(val)
+        except ValueError:
+            print("Invalid Beta.")
+            return
+        y_target = self.set_limit(y_target)
         print(f"New beta {y_target}")
         idx_l, idx_r = get_envelope(self.y_data, y_target)
         m, c = self.get_line(idx_l, idx_r)
         x_target = (y_target - c) / m
-        #x_target = round(x_target, 3)
         
         # Update the rql textbox
-        self.rql_tbox.disconnect(self.rql_tbox_cid) # Disconnect update event
-        self.rql_tbox.set_val("{0:.3f}".format(x_target))
-        self.rql_tbox_cid = self.rql_tbox.on_submit(self.rql_update) # Reconnect update event
-        
+        self.set_rql_tbox(x_target)
+        # Update the rql pt
         self.update_rql_pt(x_target, y_target)
-        
+    
+    def set_beta_tbox(self, val:float)->None:
+        """Set the beta textbox text.
+
+        Args:
+            val (float): Value to set.
+        """
+        self.beta_tbox.disconnect(self.beta_tbox_cid) # Disconnect update event
+        self.beta_tbox.set_val("{0:.3f}".format(val))
+        self.beta_tbox_cid = self.beta_tbox.on_submit(self.beta_update) # Reconnect update event
+
     #%% RQL
     def make_rql_tbox(self):
         """
@@ -495,20 +517,31 @@ class oc_plotter:
             DESCRIPTION.
 
         """
-        x_target = float(val)
+        try:
+            x_target = float(val)
+        except ValueError:
+            print("Invalid RQL.")
+            return
         x_target = self.set_limit(x_target)
         print(f"New rql {x_target}")
         idx_l, idx_r = get_envelope(self.x_data, x_target)
         m, c = self.get_line(idx_l, idx_r)
         y_target = m * x_target + c
-        #y_target = round(y_target, 3)
         
         # Update the Beta textbox
-        self.beta_tbox.disconnect(self.beta_tbox_cid) # Disconnect update event
-        self.beta_tbox.set_val("{0:.3f}".format(y_target))
-        self.beta_tbox_cid = self.beta_tbox.on_submit(self.beta_update) # Reconnect update event
-        
+        self.set_beta_tbox(y_target)
+        # Update the Rql pt
         self.update_rql_pt(x_target, y_target)
+    
+    def set_rql_tbox(self, val:float)->None:
+        """Set the RQL textbox text.
+
+        Args:
+            val (float): Value to set.
+        """
+        self.rql_tbox.disconnect(self.rql_tbox_cid) # Disconnect update event
+        self.rql_tbox.set_val("{0:.3f}".format(val))
+        self.rql_tbox_cid = self.rql_tbox.on_submit(self.rql_update) # Reconnect update event
         
 if __name__ == "__main__":
     # Set the matplotlib plotting backend
@@ -524,7 +557,11 @@ if __name__ == "__main__":
     
     #%% Sample size updater. Interfaces between plotter and oc.
     def sample_size_update(sample_size:int)->None:
-        ss = int(sample_size)
+        try:
+            ss = int(sample_size)
+        except ValueError:
+            print("Invalid Sample Size.")
+            return
         print(f"New sample size {ss}")
         oc.update_sample_size(ss)
         plotter.ax.set_title(f"OC Curve (n={oc.sample_size}, k={oc.n_accept})")
@@ -532,7 +569,11 @@ if __name__ == "__main__":
         
     #%% Acceptance number updater. Interfaces between plotter and oc.
     def acceptance_number_update(acceptance_number:int)->None:
-        n_accept = int(acceptance_number)
+        try:
+            n_accept = int(acceptance_number)
+        except ValueError:
+            print("Invalid Acceptance Number.")
+            return
         print(f"New acceptance number {n_accept}")
         oc.update_acceptance_number(n_accept)
         plotter.ax.set_title(f"OC Curve (n={oc.sample_size}, k={oc.n_accept})")
@@ -543,3 +584,4 @@ if __name__ == "__main__":
     plotter.sample_size_tbox.on_submit(sample_size_update)
     
     plt.show()
+# %%
