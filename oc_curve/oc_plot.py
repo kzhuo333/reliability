@@ -96,6 +96,23 @@ class oc_plotter:
         
         print("OC plotter initiated")
         
+    def set_limit(self, val:float, min:float = 0.0, max:float = 1.0)->float:
+        """Utility function to limit value between min and max.
+
+        Args:
+            val (float): Value of interest.
+            min (float, optional): Max limit on value. Defaults to 0.0.
+            max (float, optional): Min limit on value. Defaults to 1.0.
+
+        Returns:
+            float: Value between min and max limits.
+        """
+        if val > max:
+            return max
+        elif val < min:
+            return min
+        else:
+            return val
 
     #%% Generic data update methods
     def update_data(self, x_data:List[float], y_data:List[float])->None:
@@ -330,6 +347,8 @@ class oc_plotter:
         
         # Use linear interpolation to find AQL target corresponding to given Alpha target
         y_target = 1.0 - float(val)
+        y_target = self.set_limit(y_target)
+
         print(f"New Alpha {y_target}")
         idx_l, idx_r = get_envelope(self.y_data, y_target)
         m, c = self.get_line(idx_l, idx_r)
@@ -477,6 +496,7 @@ class oc_plotter:
 
         """
         x_target = float(val)
+        x_target = self.set_limit(x_target)
         print(f"New rql {x_target}")
         idx_l, idx_r = get_envelope(self.x_data, x_target)
         m, c = self.get_line(idx_l, idx_r)
