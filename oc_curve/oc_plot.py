@@ -8,9 +8,7 @@ Created on Tue Dec 13 02:38:54 2022
 @author: kzhuo
 """
 
-
 import sys
-sys.path.insert(0, '/Users/kzhuo/kz/oc_curve')
 
 from oc_curve import get_envelope, oc_curve
 import matplotlib.pyplot as plt
@@ -18,7 +16,6 @@ from matplotlib.widgets import Slider, Button, TextBox
 from typing import Final, List, Tuple
 
 import matplotlib
-%matplotlib auto
 
 # Positions of plot components, as fraction of canvas size
 X_CORNER:Final[float] = 0.25 # main plot x corner
@@ -337,16 +334,22 @@ class oc_plotter:
         idx_l, idx_r = get_envelope(self.y_data, y_target)
         m, c = self.get_line(idx_l, idx_r)
         x_target = (y_target - c) / m
-        #x_target = round(x_target, 3)
         
         # Update the AQL textbox
-        self.aql_tbox.disconnect(self.aql_tbox_cid) # Disconnect update event
-        self.aql_tbox.set_val("{0:.3f}".format(x_target))
-        self.aql_tbox_cid = self.aql_tbox.on_submit(self.aql_update) # Reconnect update event
-        
+        self.set_aql_tbox(x_target)
+        # Update the Aql point
         self.update_aql_pt(x_target, y_target)
         
-    
+    def set_alpha_tbox(self, val:float):
+        """Update the alpha textbox text.
+
+        Args:
+            val (float): Update value.
+        """
+        self.alpha_tbox.disconnect(self.alpha_tbox_cid) # Disconnect update event
+        self.alpha_tbox.set_val("{0:.3f}".format(val))
+        self.alpha_tbox_cid = self.alpha_tbox.on_submit(self.alpha_update) # Reconnect update event
+
     #%% AQL
     def make_aql_tbox(self)->None:
         """
@@ -383,14 +386,21 @@ class oc_plotter:
         idx_l, idx_r = get_envelope(self.x_data, x_target)
         m, c = self.get_line(idx_l, idx_r)
         y_target = m * x_target + c
-        y_target = round(y_target, 3)
         
         # Update the Alpha textbox
-        self.alpha_tbox.disconnect(self.alpha_tbox_cid) # Disconnect update event
-        self.alpha_tbox.set_val("{0:.3f}".format(1.0 - y_target))
-        self.alpha_tbox_cid = self.alpha_tbox.on_submit(self.alpha_update) # Reconnect update event
-        
+        self.set_alpha_tbox(1.0-y_target)
+        # Update the Aql point
         self.update_aql_pt(x_target, y_target)
+
+    def set_aql_tbox(self, val:float)->None:
+        """Update the Aql textbox text.
+
+        Args:
+            val (float): Value to update the Aql textbox text.
+        """
+        self.aql_tbox.disconnect(self.aql_tbox_cid) # Disconnect update event
+        self.aql_tbox.set_val("{0:.3f}".format(val))
+        self.aql_tbox_cid = self.aql_tbox.on_submit(self.aql_update) # Reconnect update event
 
     #%% Beta
     def make_beta_tbox(self)->None:
