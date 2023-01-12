@@ -13,7 +13,7 @@ import sys
 from oc_curve import get_envelope, oc_curve
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, TextBox
-from typing import Final, List, Tuple
+from typing import Final, List, Tuple, Union
 
 import matplotlib
 
@@ -26,9 +26,71 @@ SLIDER_OFFSET:Final[float] = 0.15 # slider offset from the main plot
 
 # Sample plan defaults
 SAMPLE_SIZE:Final[int] = 300
+SAMPLE_SIZE_MAX:Final[int] = 500000
+SAMPLE_SIZE_MIN:Final[int] = 1
 ACCEPTANCE_NUMBER:Final[int] = 3
+ACCEPTANCE_NUMBER_MAX:Final[int] = 500000
+ACCEPTANCE_NUMBER_MIN:Final[int] = 0
 ALPHA:Final[float] = 0.05
 BETA:Final[float] = 0.10
+
+def check_int(min:int, max:int):
+    """Decorator for checking integer is valid and within range.
+
+    Args:
+        min (int): Min allowed value.
+        max (int): Max allowed value.
+    """
+    def decor(func):
+        def wrapper(*args):
+            try:
+                val = int(args[0])
+            except ValueError:
+                print(f"Invalid user entry: {args[0]}.")
+                return
+            
+            if val > max:
+                val = max
+                print(f"Max allowed value is {max}")
+            elif val < min:
+                val = min
+                print(f"Min allowed value is {min}")
+
+            func(val)
+        
+        return wrapper
+    return decor
+    
+
+def check_float(min:float, max:float):
+    """Decorator for checking valid float is within range.
+
+    Args:
+        min (float): Min allowed value
+        max (float): Max allowed value.
+    """
+    def decor(func):
+        def wrapper(*args):
+            try:
+                val = float(args[1])
+            except ValueError:
+                print(f"Invalid user entry: {args[1]}.")
+                return
+            
+            if val > max:
+                val = max
+                print(f"Max allowed value is {max}")
+            elif val < min:
+                val = min
+                print(f"Min allowed value is {min}")
+
+            x = list(args)
+            x[1] = val
+            args = tuple(x)
+            func(*args)
+        
+        return wrapper
+    return decor
 
 class oc_plotter:
     """
@@ -86,13 +148,13 @@ class oc_plotter:
         self.make_alpha_tbox()
         self.make_aql_tbox()      
         # Update Alpha and AQL to default values
-        self.alpha_update(f"{ALPHA}")
+        self.alpha_update(ALPHA)
         
         # Make Beta risk and RQL text boxes
         self.make_beta_tbox()
         self.make_rql_tbox()
         # UPdate Beta and RQL to default values
-        self.beta_update(f"{BETA}")
+        self.beta_update(BETA)
         
         print("OC plotter initiated")
         
@@ -330,8 +392,8 @@ class oc_plotter:
         self.alpha_tbox.set_val(f"{ALPHA}")
         self.alpha_tbox_cid = self.alpha_tbox.on_submit(self.alpha_update) # Note cid to connect/disconnect events
         
-    
-    def alpha_update(self, val:str)->None:
+    @check_float(0.0, 1.0)
+    def alpha_update(self, val:Union[str,float])->None:
         """
         Update method for Alpha risk textbox. Updates (1) AQL textbox and (2) point for given Alpha.
 
@@ -346,13 +408,7 @@ class oc_plotter:
         """
         
         # Use linear interpolation to find AQL target corresponding to given Alpha target
-        try:
-            y_target = 1.0 - float(val)
-        except ValueError:
-            print("Invalid Alpha.")
-            return
-        y_target = self.set_limit(y_target)
-
+        y_target = 1.0 - float(val)
         print(f"New Alpha {y_target}")
         idx_l, idx_r = get_envelope(self.y_data, y_target)
         m, c = self.get_line(idx_l, idx_r)
@@ -388,6 +444,7 @@ class oc_plotter:
         self.aql_tbox = TextBox(aql_tbox_ax, "AQL", textalignment="left")
         self.aql_tbox_cid = self.aql_tbox.on_submit(self.aql_update) # Note cid to connect/disconnect events
         
+    @check_float(0.0, 1.0)
     def aql_update(self, val:str)->None:
         """
         Method to update AQL.
@@ -404,13 +461,7 @@ class oc_plotter:
 
         """
         # Use linear interpolation to find Alpha target corresponding to given AQL target
-        try:
-            x_target = float(val)
-        except ValueError:
-            print("Invalid AQL.")
-            return
-
-        x_target = self.set_limit(x_target)
+        x_target = float(val)
         print(f"New AQL {x_target}")
         idx_l, idx_r = get_envelope(self.x_data, x_target)
         m, c = self.get_line(idx_l, idx_r)
@@ -447,6 +498,7 @@ class oc_plotter:
         self.beta_tbox.set_val(f"{BETA}")
         self.beta_tbox_cid = self.beta_tbox.on_submit(self.beta_update)
     
+    @check_float(0.0, 1.0)
     def beta_update(self, val:str)->None:
         """
         Update method for beta risk textbox. Updates (1) rql textbox and (2) point for given beta.
@@ -462,12 +514,7 @@ class oc_plotter:
         """
         
         # Use linear interpolation to find rql target corresponding to given beta target
-        try:
-            y_target = float(val)
-        except ValueError:
-            print("Invalid Beta.")
-            return
-        y_target = self.set_limit(y_target)
+        y_target = float(val)
         print(f"New beta {y_target}")
         idx_l, idx_r = get_envelope(self.y_data, y_target)
         m, c = self.get_line(idx_l, idx_r)
@@ -502,6 +549,7 @@ class oc_plotter:
         self.rql_tbox = TextBox(rql_tbox_ax, "RQL", textalignment="left")
         self.rql_tbox_cid = self.rql_tbox.on_submit(self.rql_update)
         
+    @check_float(0.0, 1.0)
     def rql_update(self, val:str)->None:
         """
         Method to update RQL.
@@ -517,12 +565,7 @@ class oc_plotter:
             DESCRIPTION.
 
         """
-        try:
-            x_target = float(val)
-        except ValueError:
-            print("Invalid RQL.")
-            return
-        x_target = self.set_limit(x_target)
+        x_target = float(val)
         print(f"New rql {x_target}")
         idx_l, idx_r = get_envelope(self.x_data, x_target)
         m, c = self.get_line(idx_l, idx_r)
@@ -556,24 +599,18 @@ if __name__ == "__main__":
     plotter = oc_plotter(oc.x_data, oc.y_data)
     
     #%% Sample size updater. Interfaces between plotter and oc.
-    def sample_size_update(sample_size:int)->None:
-        try:
-            ss = int(sample_size)
-        except ValueError:
-            print("Invalid Sample Size.")
-            return
+    @check_int(SAMPLE_SIZE_MIN, SAMPLE_SIZE_MAX)
+    def sample_size_update(sample_size:Union[str,int])->None:
+        ss = int(sample_size)
         print(f"New sample size {ss}")
         oc.update_sample_size(ss)
         plotter.ax.set_title(f"OC Curve (n={oc.sample_size}, k={oc.n_accept})")
         plotter.update_data(oc.x_data, oc.y_data)
         
     #%% Acceptance number updater. Interfaces between plotter and oc.
-    def acceptance_number_update(acceptance_number:int)->None:
-        try:
-            n_accept = int(acceptance_number)
-        except ValueError:
-            print("Invalid Acceptance Number.")
-            return
+    @check_int(ACCEPTANCE_NUMBER_MIN, ACCEPTANCE_NUMBER_MAX)
+    def acceptance_number_update(acceptance_number:Union[str, int])->None:
+        n_accept = int(acceptance_number)
         print(f"New acceptance number {n_accept}")
         oc.update_acceptance_number(n_accept)
         plotter.ax.set_title(f"OC Curve (n={oc.sample_size}, k={oc.n_accept})")
