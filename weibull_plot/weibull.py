@@ -2,7 +2,7 @@
 """
 import math
 
-def pdf(t:float, m:float, c:float)-> float:
+def pdf(t:float, m:float=1.0, c:float=1.0)-> float:
     """Weibull probability distribution function.
 
     Args:
@@ -14,9 +14,9 @@ def pdf(t:float, m:float, c:float)-> float:
         float: result
     """
     p = - pow(t/c, m)
-    m/t * pow(t/c, m) * pow(math.e, p)
+    return m/t * pow(t/c, m) * pow(math.e, p)
 
-def cdf(t:float, m:float, c:float)-> float:
+def cdf(t:float, m:float=1.0, c:float=1.0)-> float:
     """Weibull cumulative distribution function.
 
     Args:
@@ -30,7 +30,7 @@ def cdf(t:float, m:float, c:float)-> float:
     p = - pow(t/c, m)
     return 1.0-pow(math.e, p)
 
-def hazard(t:float, m:float, c:float)-> float:
+def hazard(t:float, m:float=1.0, c:float=1.0)-> float:
     """Weibull hazard function aka failure rate.
 
     Args:
