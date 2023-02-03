@@ -1,6 +1,5 @@
 """Generate plots for Weibull functions.
 """
-
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.widgets import TextBox
@@ -38,9 +37,10 @@ class weibull_model:
         """
         self.m = m
         self.c = c
-        self.t_data = list(np.linspace(t_start, t_end, t_count))
+        
+        self.t_data = list(np.linspace(t_start, t_end, t_count)) # Generate horizontal axis data
 
-        self.reset_model()
+        self.reset_model() # Generate model data
 
     def update_m(self, m:float)->None:
         """Update the shape parameter.
@@ -49,7 +49,7 @@ class weibull_model:
             m (float): Value to update.
         """
         self.m = m
-        self.reset_model()        
+        self.reset_model() # Refresh model data
 
     def reset_model(self)->None:
         """Regenerate vertical axes data.
@@ -57,6 +57,7 @@ class weibull_model:
         self.cdf_data = list()
         self.pdf_data = list()
         self.h_data = list()
+        # Use existing Weibull model parameters to regenerate vertical axis data
         for t in self.t_data:
             self.cdf_data.append(wb.cdf(t, self.m, self.c))
             self.pdf_data.append(wb.pdf(t, self.m, self.c))
@@ -88,14 +89,14 @@ class weibull_plot:
         self.h_line, = self.ax2.plot(self.model.t_data, self.model.h_data, linestyle='solid')
        
         # Plot titles
-        self.ax0.set_title("CDF", weight="bold")
-        self.ax1.set_title("PDF", weight="bold")
+        self.ax0.set_title("Cumulative Density Function", weight="bold")
+        self.ax1.set_title("Probability Density Function", weight="bold")
         self.ax2.set_title("Failure Rate", weight="bold")        
 
         # Plot axis labels and grid
-        self.ax0.set_ylabel("Probability (Dimensionless)")
-        self.ax1.set_ylabel("Probability Density ($c^{-1}$)")
-        self.ax2.set_ylabel("Failure Rate ($c^{-1}$)")
+        self.ax0.set_ylabel("$F(t)$ (Dimensionless)")
+        self.ax1.set_ylabel("$f(t)$ ($c^{-1}$)")
+        self.ax2.set_ylabel("$h(t)$ ($c^{-1}$)")
         self.ax0.set_ylim(top = 1.0)
         self.ax1.set_ylim(top = 5.0)
         self.ax2.set_ylim(auto=True)
@@ -125,7 +126,8 @@ class weibull_plot:
         m_tbox_ax = self.fig.add_axes([0.1, 0.9, 0.075, 0.05])
         self.m_tbox = TextBox(m_tbox_ax, "m", textalignment="left")
         self.m_tbox.set_val(f"{SHAPE_PARAMETER}")
-        self.m_tbox_cid = self.m_tbox.on_submit(self.m_update)
+        # Hook up update method to the event
+        self.m_tbox.on_submit(self.m_update)
 
     def m_update(self, val:Union[str,int])->None:
         """Method to update shape parameter and refresh model data.
@@ -141,7 +143,6 @@ class weibull_plot:
     def update_data(self)->None:
         """Method to refresh model data.
         """
-
         self.cdf_line.set_ydata(self.model.cdf_data)
         self.pdf_line.set_ydata(self.model.pdf_data)
         self.h_line.set_ydata(self.model.h_data)
@@ -150,6 +151,7 @@ class weibull_plot:
         self.pdf_line.set_xdata(self.model.t_data)        
         self.h_line.set_xdata(self.model.t_data)
 
+        # Rescale the axes where scaling is set to auto
         for x in [self.ax0, self.ax1, self.ax2]:
             x.relim()
             x.autoscale_view()
