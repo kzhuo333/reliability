@@ -3,8 +3,8 @@
 
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button, TextBox
-from typing import Final, List, Tuple, Union
+from matplotlib.widgets import TextBox
+from typing import Final, Union
 import numpy as np
 import weibull as wb
 
