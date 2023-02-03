@@ -22,7 +22,7 @@ SHAPE_PARAMETER:Final[float] = 1.0
 SCALE_PARAMETER:Final[float] = 1.0
 
 class weibull_model:
-    def __init__(self, m:float = SHAPE_PARAMETER, c:float = SCALE_PARAMETER, t_count:int = SAMPLE_SIZE, t_start:float = 0.0, t_end:float = 2.0) -> None:
+    def __init__(self, m:float = SHAPE_PARAMETER, c:float = SCALE_PARAMETER, t_count:int = SAMPLE_SIZE, t_start:float = 1E-2, t_end:float = 2.0) -> None:
         self.m = m
         self.c = c
         self.t_data = list(np.linspace(t_start, t_end, t_count))
@@ -70,6 +70,10 @@ class weibull_plot:
         self.ax0.set_ylabel("Probability (Dimensionless)")
         self.ax1.set_ylabel("Probability Density ($c^{-1}$)")
         self.ax2.set_ylabel("Failure Rate ($c^{-1}$)")
+        self.ax0.set_ylim(top = 1.0)
+        self.ax1.set_ylim(top = 5.0)
+        self.ax2.set_ylim(auto=True)
+
         for x in [self.ax0, self.ax1, self.ax2]:
             x.set_xlabel("$t$ ($c$)")
             x.grid(visible=True, which='both', axis='both')
@@ -105,7 +109,9 @@ class weibull_plot:
 
         for x in [self.ax0, self.ax1, self.ax2]:
             x.relim()
-
+            x.autoscale_view()
+        
+        #plt.draw()
         self.fig.canvas.draw() # This is needed to force the plot to refresh or there will be some delay
 
 if __name__ == "__main__":
@@ -115,7 +121,7 @@ if __name__ == "__main__":
         matplotlib.use("Qt5Agg") # macosx backend is buggy for textbox widget. qt5 seems decent.
     print(f"Using backend {matplotlib.get_backend()}")
     
-    mm = weibull_model(10) # Create Weibull model
+    mm = weibull_model() # Create Weibull model
     pp = weibull_plot(mm) # Pass model into plotter
     
     #plt.tight_layout() # this conflicts with subplots_adjust
