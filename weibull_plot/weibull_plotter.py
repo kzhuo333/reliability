@@ -135,7 +135,12 @@ class weibull_plot:
         Args:
             val (Union[str,int]): Value to update.
         """
-        m = float(val)
+        try:
+            m = float(val)
+        except ValueError:
+            print("Invalid shape parameter")
+            return
+        
         print(f"New shape parameter m {m}")
         self.model.update_m(m)
         self.update_data()
