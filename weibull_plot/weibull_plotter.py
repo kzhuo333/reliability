@@ -1,6 +1,6 @@
 """Generate plots for Weibull functions.
 """
-import sys
+
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, TextBox
@@ -21,19 +21,40 @@ SAMPLE_SIZE:Final[int] = 100
 SHAPE_PARAMETER:Final[float] = 1.0
 SCALE_PARAMETER:Final[float] = 1.0
 
+T_START:Final[float] = 1E-2
+T_END:Final[float] = 2.0
+
 class weibull_model:
-    def __init__(self, m:float = SHAPE_PARAMETER, c:float = SCALE_PARAMETER, t_count:int = SAMPLE_SIZE, t_start:float = 1E-2, t_end:float = 2.0) -> None:
+    """Class to generate Weibull statistics data for given parameters.
+    """
+    def __init__(self, m:float = SHAPE_PARAMETER, c:float = SCALE_PARAMETER, t_count:int = SAMPLE_SIZE, t_start:float = T_START, t_end:float = T_END) -> None:
+        """Constructor requiring shape and scale parameters to generate Weibull model data.
+
+        Args:
+            m (float, optional): Shape parameter.
+            c (float, optional): Scale parameter.
+            t_count (int, optional): No. of points for horizontal axis data.
+            t_start (float, optional): Horizontal axis start value.
+            t_end (float, optional): Horizontal axis end value.
+        """
         self.m = m
         self.c = c
         self.t_data = list(np.linspace(t_start, t_end, t_count))
 
         self.reset_model()
 
-    def update_m(self, m):
+    def update_m(self, m:float)->None:
+        """Update the shape parameter.
+
+        Args:
+            m (float): Value to update.
+        """
         self.m = m
         self.reset_model()        
 
-    def reset_model(self):
+    def reset_model(self)->None:
+        """Regenerate vertical axes data.
+        """
         self.cdf_data = list()
         self.pdf_data = list()
         self.h_data = list()
@@ -102,10 +123,9 @@ class weibull_plot:
         m = float(val)
         print(f"New shape parameter m {m}")
         self.model.update_m(m)
-
         self.update_data()
 
-    def update_data(self):
+    def update_data(self)->None:
         
         self.cdf_line.set_ydata(self.model.cdf_data)
         self.pdf_line.set_ydata(self.model.pdf_data)
@@ -131,5 +151,4 @@ if __name__ == "__main__":
     mm = weibull_model() # Create Weibull model
     pp = weibull_plot(mm) # Pass model into plotter
     
-    #plt.tight_layout() # this conflicts with subplots_adjust
     plt.show()
