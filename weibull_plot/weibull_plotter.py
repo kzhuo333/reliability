@@ -10,7 +10,7 @@ import weibull as wb
 
 # Plot position default settings
 LEFT:Final[float] = 0.1
-TOP:Final[float] = 0.8
+TOP:Final[float] = 0.75
 WSPACE:Final[float] = 0.2
 HSPACE:Final[float] = 0.5
 FIG_HEIGHT:Final[float] = 6.0
@@ -51,7 +51,7 @@ class weibull_plot:
         self.fig, ((self.ax0, self.ax1), (self.ax2, self.ax3)) = plt.subplots(2,2)
         self.fig.set_figheight(FIG_HEIGHT)
         self.fig.set_figwidth(FIG_WIDTH)
-        self.fig.suptitle("Weibull Model")
+        self.fig.suptitle("Weibull Model", weight="bold")
         self.fig.subplots_adjust(left=LEFT, top=TOP, wspace = WSPACE, hspace=HSPACE)
         
         self.ax3.axis("off") # Dummy axis not needed. Blank it.
@@ -62,9 +62,9 @@ class weibull_plot:
         self.h_line, = self.ax2.plot(self.model.t_data, self.model.h_data, linestyle='solid')
        
         # Plot titles
-        self.ax0.set_title("CDF")
-        self.ax1.set_title("PDF")
-        self.ax2.set_title("Failure Rate")        
+        self.ax0.set_title("CDF", weight="bold")
+        self.ax1.set_title("PDF", weight="bold")
+        self.ax2.set_title("Failure Rate", weight="bold")        
 
         # Plot axis labels and grid
         self.ax0.set_ylabel("Probability (Dimensionless)")
@@ -81,7 +81,15 @@ class weibull_plot:
         # Make textbox for shape parameter m
         self.make_m_tbox()
 
+        # Make textbox for notes
+        self.make_note_txt()
+
         print("Weibull plotter initiated")
+
+    def make_note_txt(self)->None:
+        self.note_txt_ax = self.fig.add_axes([0.2, 0.85, 0.075, 0.05])
+        self.note_txt_ax.axis("off")
+        self.note_txt_ax.text(0.0, 0.0, "$m$ is the shape parameter.\n$c$ is the scale parameter or characteristic lifetime.\nTime $t$ is in multiples of $c$.")
 
     def make_m_tbox(self)->None:
         
@@ -111,7 +119,6 @@ class weibull_plot:
             x.relim()
             x.autoscale_view()
         
-        #plt.draw()
         self.fig.canvas.draw() # This is needed to force the plot to refresh or there will be some delay
 
 if __name__ == "__main__":
