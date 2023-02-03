@@ -17,10 +17,9 @@ FIG_HEIGHT:Final[float] = 6.0
 FIG_WIDTH:Final[float] = 9.0
 
 # Weibull model default settings
-SAMPLE_SIZE:Final[int] = 100
 SHAPE_PARAMETER:Final[float] = 1.0
 SCALE_PARAMETER:Final[float] = 1.0
-
+SAMPLE_SIZE:Final[int] = 100
 T_START:Final[float] = 1E-2
 T_END:Final[float] = 2.0
 
@@ -64,8 +63,14 @@ class weibull_model:
             self.h_data.append(wb.hazard(t, self.m, self.c))
 
 class weibull_plot:
+    """Class to generate Weibull plots for given Weibull model.
+    """
     def __init__(self, model:weibull_model)->None:
-        
+        """Constructor requiring Weibull model object.
+
+        Args:
+            model (weibull_model): Weibull model object with Weibull parameters and data.
+        """
         self.model = model
 
         # Default main plot settings and definitions
@@ -108,25 +113,35 @@ class weibull_plot:
         print("Weibull plotter initiated")
 
     def make_note_txt(self)->None:
+        """Method to create non-interactive text box for notes.
+        """
         self.note_txt_ax = self.fig.add_axes([0.2, 0.85, 0.075, 0.05])
         self.note_txt_ax.axis("off")
         self.note_txt_ax.text(0.0, 0.0, "$m$ is the shape parameter.\n$c$ is the scale parameter or characteristic lifetime.\nTime $t$ is in multiples of $c$.")
 
     def make_m_tbox(self)->None:
-        
+        """Method to create text box for user to change Weibull shape parameter m.
+        """
         m_tbox_ax = self.fig.add_axes([0.1, 0.9, 0.075, 0.05])
         self.m_tbox = TextBox(m_tbox_ax, "m", textalignment="left")
         self.m_tbox.set_val(f"{SHAPE_PARAMETER}")
         self.m_tbox_cid = self.m_tbox.on_submit(self.m_update)
 
     def m_update(self, val:Union[str,int])->None:
+        """Method to update shape parameter and refresh model data.
+
+        Args:
+            val (Union[str,int]): Value to update.
+        """
         m = float(val)
         print(f"New shape parameter m {m}")
         self.model.update_m(m)
         self.update_data()
 
     def update_data(self)->None:
-        
+        """Method to refresh model data.
+        """
+
         self.cdf_line.set_ydata(self.model.cdf_data)
         self.pdf_line.set_ydata(self.model.pdf_data)
         self.h_line.set_ydata(self.model.h_data)
@@ -142,6 +157,8 @@ class weibull_plot:
         self.fig.canvas.draw() # This is needed to force the plot to refresh or there will be some delay
 
 if __name__ == "__main__":
+    """Main entry point into Weibull plotter.
+    """
     # Set the matplotlib plotting backend
     backend = matplotlib.get_backend()
     if backend != 'Qt5Agg':
