@@ -73,6 +73,21 @@ class binomial_plot:
         self.fig.suptitle("Binomial Distribution", weight="bold")
         self.fig.subplots_adjust(left=LEFT, top=TOP, hspace = HSPACE)
 
+        # Set up user input text boxes
+        self.make_pfail_tbox()
+        self.make_n_tbox()
+
+        # Generate plots
+        self.generate_plots()
+
+    def generate_plots(self)->None:
+        """Set up plot axes and generate the plots.
+        """
+
+        # Clear the axes so that plots don't drawn on top of each other
+        self.ax0.cla()
+        self.ax1.cla()
+
         # Generate plots
         # Note this must be done before setting axis properties, or else will be a mess
         sns.barplot(x=self.model.x_data, y=self.model.pmf_data, ax=self.ax0, color = 'Orange')
@@ -80,7 +95,7 @@ class binomial_plot:
 
         # Plot titles
         self.ax0.set_title("Probability Density Function", weight="bold")
-        self.ax1.set_title("Cumulative Density Function", weight="bold")
+        self.ax1.set_title("Cumulative Density Function", weight="bold")        
         
         # Plot axis labels and grid
         self.ax0.set_ylabel("Probability")
@@ -94,25 +109,19 @@ class binomial_plot:
             x.grid(visible=True, which='both', axis='y')
             x.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(5))
             x.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
-
-
-        self.make_pfail_tbox()
-        self.make_n_tbox()
-
-    def update_data(self)->None:
-        self.model.reset_model()
-
-        sns.barplot(x=self.model.x_data, y=self.model.pmf_data, ax=self.ax0, color = 'Orange')
-        sns.barplot(x=self.model.x_data, y=self.model.cdf_data, ax=self.ax1, color = 'Green')
-
-        # Rescale the axes where scaling is set to auto
-        for x in [self.ax0, self.ax1]:
             x.relim()
             x.autoscale_view()
         
-        self.fig.canvas.draw() # This is needed to force the plot to refresh or there will be some delay
-        plt.show()
+        # This is needed to force the plot to refresh or there will be some delay
+        self.fig.canvas.draw() 
 
+    def update_data(self)->None:
+        # Update the model to generate new data
+        self.model.reset_model()
+
+        # Update the plots
+        self.generate_plots()
+        
     def make_pfail_tbox(self)->None:
         
         pfail_tbox_ax = self.fig.add_axes([0.3, 0.9, 0.075, 0.04])
@@ -181,5 +190,5 @@ if __name__ == '__main__':
     print(m.pmf_data)
 
     p = binomial_plot(m)
-
+    
     plt.show()
