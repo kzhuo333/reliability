@@ -18,7 +18,6 @@ FIG_WIDTH:Final[float] = 7.0
 LEFT:Final[float] = 0.2
 TOP:Final[float] = 0.8
 # Padding between subplots
-#WSPACE:Final[float] = 0.2
 HSPACE:Final[float] = 0.5
 
 # General tolerance value
@@ -86,9 +85,21 @@ class binomial_model:
         self.n = n
 
 class binomial_plot:
+    """Class to generate plots of binomial distribution functions.
+    """
+
     def __init__(self, model:binomial_model)->None:
         self.model = model
 
+        # Generate canvas
+        self.generate_figure()
+
+        # Generate plots
+        self.generate_plots()
+
+    def generate_figure(self)->None:
+        """Set up the figure canvas including plot axes and input text boxes.
+        """
         # Default main plot settings and definitions
         self.fig, ((self.ax0), (self.ax1)) = plt.subplots(2,1)
         self.fig.set_figheight(FIG_HEIGHT)
@@ -99,9 +110,6 @@ class binomial_plot:
         # Set up user input text boxes
         self.make_pfail_tbox()
         self.make_n_tbox()
-
-        # Generate plots
-        self.generate_plots()
 
     def generate_plots(self)->None:
         """Set up plot axes and generate the plots.
@@ -139,6 +147,8 @@ class binomial_plot:
         self.fig.canvas.draw() 
 
     def update_data(self)->None:
+        """Update the binomial model data and then regenerate plots with new data.
+        """
         # Update the model to generate new data
         self.model.reset_model()
 
@@ -146,6 +156,8 @@ class binomial_plot:
         self.generate_plots()
         
     def make_pfail_tbox(self)->None:
+        """Set up the user input box for probability of failure.
+        """
         
         pfail_tbox_ax = self.fig.add_axes([0.3, 0.9, 0.075, 0.04])
         self.pfail_tbox = TextBox(pfail_tbox_ax, "Probability Of Failure", textalignment="left")
@@ -154,6 +166,11 @@ class binomial_plot:
         self.pfail_tbox.on_submit(self.pfail_update)
 
     def pfail_update(self, val:Union[str,int])->None:
+        """Updates the pfail parameter in the binomial model.
+
+        Args:
+            val (Union[str,int]): New pfail value to update.
+        """
         
         try:
             pfail = float(val)
@@ -174,6 +191,8 @@ class binomial_plot:
         self.update_data()
 
     def make_n_tbox(self)->None:
+        """Set up the user input sample size text box.
+        """
         
         pfail_n_ax = self.fig.add_axes([0.6, 0.9, 0.075, 0.04])
         self.n_tbox = TextBox(pfail_n_ax, "Sample Size", textalignment="left")
@@ -182,6 +201,11 @@ class binomial_plot:
         self.n_tbox.on_submit(self.n_update)
 
     def n_update(self, val:Union[str,int])->None:
+        """Method to update the sample size variable in the binomial model.
+
+        Args:
+            val (Union[str,int]): New value for sample size to update.
+        """
         
         try:
             n = int(val)
@@ -202,16 +226,16 @@ class binomial_plot:
         self.update_data()        
 
 if __name__ == '__main__':
+    # Entry point into main code
+
     # Set the matplotlib plotting backend
     backend = matplotlib.get_backend()
     if backend != 'Qt5Agg':
         matplotlib.use("Qt5Agg") # macosx backend is buggy for textbox widget. qt5 seems decent.
     print(f"Using backend {matplotlib.get_backend()}")
 
+    # Generate the binomial distribution model and pass it to the plot generator
     m = binomial_model()
-    print(m.x_data)
-    print(m.pmf_data)
-
     p = binomial_plot(m)
     
     plt.show()
