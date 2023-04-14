@@ -1,3 +1,8 @@
+"""Generates interactive plotter for binomial distribution probability density and cumulative probability density against number of fails.
+User inputs are sample size and probability of failure. Binomial model class sets up the model and data.
+Binomial plot class takes in the binomial model and generates plots.
+"""
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -9,6 +14,7 @@ from scipy.stats import binom
 # Binomial distribution default parameters
 SAMPLE_SIZE: Final[int] = 100
 PFAIL: Final[int] = 0.05
+SAMPLE_SIZE_MAX: Final[int] = 5000
 
 # Overall canvas size
 FIG_HEIGHT:Final[float] = 8.0
@@ -50,23 +56,28 @@ class binomial_model:
         self.pmf_data = np.empty(len(self.x_data))
         self.cdf_data = np.empty(len(self.x_data))
 
-        for c in np.arange(0, self.n+1):
+        # Don't want to start from 0 to save time and resources, unless necessary
+        # Expect peak no. of fail around pfail * n so start slightly less than that
+        cmin = round(0.75 * self.pfail * self.n)
+        i = 0
+        for c in np.arange(cmin, self.n+1):
             # Set horizontal axis point
-            self.x_data[c] = c
-            # apply prob dens function
-            self.pmf_data[c] = binom.pmf(c, self.n, self.pfail)
-            # apply cumulative density function
-            self.cdf_data[c] = binom.cdf(c, self.n, self.pfail)
+            self.x_data[i] = c
+            # Get vertical axes data
+            self.pmf_data[i] = binom.pmf(c, self.n, self.pfail)
+            self.cdf_data[i] = binom.cdf(c, self.n, self.pfail)
 
             # Break the loop once the CDF gets close enough to its max allowed value of 1.0
             # Try to stop early to make code more responsive
-            if self.cdf_data[c] > 1-TOL:
+            if self.cdf_data[i] > 1-TOL:
                 break
 
+            i += 1
+
         # Now we know number of elements needed, cut off elements beyond that
-        self.x_data = self.x_data[0:c+1]
-        self.pmf_data = self.pmf_data[0:c+1]
-        self.cdf_data = self.cdf_data[0:c+1]
+        self.x_data = self.x_data[0:i+1]
+        self.pmf_data = self.pmf_data[0:i+1]
+        self.cdf_data = self.cdf_data[0:i+1]
 
     def update_pfail(self, pfail:float)->None:
         """Method to update the pfail value.
@@ -214,8 +225,8 @@ class binomial_plot:
             return
         
         # Prob of failure must be between 0.0 and 1.0
-        if n > 10000:
-            print("Sample size must be less than 10000")
+        if n > SAMPLE_SIZE_MAX:
+            print(f"Sample size must be less than {SAMPLE_SIZE_MAX}")
             return
         elif n < 1:
             print("Sample size must be more than 0")
