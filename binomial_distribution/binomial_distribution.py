@@ -25,13 +25,25 @@ HSPACE:Final[float] = 0.5
 TOL:Final[float] = 1E-6
 
 class binomial_model:
+    """Binomial distribution model class.
+    """
+
     def __init__(self, n: int = SAMPLE_SIZE, pfail: float = PFAIL)->None:
+        """Constructor for the binomial distribution model.
+
+        Args:
+            n (int, optional): Sample size. Defaults to SAMPLE_SIZE.
+            pfail (float, optional): Probability of failure. Defaults to PFAIL.
+        """
         self.n = n
         self.pfail = pfail
 
         self.reset_model()
 
     def reset_model(self)->None:
+        """Regenerates data sets for number of fails, probability density and cumulative probability density.
+        """
+
         # Not sure how many elements to include in each data array so initialise each with the max possible length
         # Set up horizontal axis data of integer number of fails
         self.x_data = np.arange(0, self.n+1)
@@ -48,6 +60,7 @@ class binomial_model:
             self.cdf_data[c] = binom.cdf(c, self.n, self.pfail)
 
             # Break the loop once the CDF gets close enough to its max allowed value of 1.0
+            # Try to stop early to make code more responsive
             if self.cdf_data[c] > 1-TOL:
                 break
 
@@ -57,9 +70,19 @@ class binomial_model:
         self.cdf_data = self.cdf_data[0:c+1]
 
     def update_pfail(self, pfail:float)->None:
+        """Method to update the pfail value.
+
+        Args:
+            pfail (float): New value for probability of failure.
+        """
         self.pfail = pfail
 
     def update_n(self, n:int)->None:
+        """Method to update the sample size.
+
+        Args:
+            n (int): Sample size.
+        """
         self.n = n
 
 class binomial_plot:
